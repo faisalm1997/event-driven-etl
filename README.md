@@ -33,7 +33,7 @@ event-driven-etl/
 ├── tests/
 │   ├── test_lambda_handler.py
 │   └── test_glue_transform.py
-├── ci-cd/
+├── .github/
 │   ├── github-actions.yaml
 │   └── codebuild-buildspec.yml
 ├── docs/
