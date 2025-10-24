@@ -1,5 +1,7 @@
 # event-driven-etl
 
+Purpose: Event-driven ETL pipeline for ingesting and processing real-time data streams using Kinesis, Lambda, and Glue.
+
 ## Repo Structure
 
 ```sh
