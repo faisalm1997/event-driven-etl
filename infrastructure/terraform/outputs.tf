@@ -55,3 +55,11 @@ output "athena_results_location" {
   value       = "s3://${aws_s3_bucket.athena_results_bucket.bucket}/output/"
   description = "Athena results S3 location"
 }
+
+output "glue_database_name" {
+  value = aws_glue_catalog_database.validated_events_db.name
+}
+
+output "glue_table_name" {
+  value = aws_glue_catalog_table.validated_events_table.name
+}
