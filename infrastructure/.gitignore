@@ -29,6 +29,6 @@ terraform.rc
 planout
 
 .terraform/
-./terraform/.terraform.lock.hcl
+*.lock.hcl
 *.tfstate
 *.tfstate.backup
