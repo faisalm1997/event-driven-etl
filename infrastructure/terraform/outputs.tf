@@ -41,3 +41,17 @@ output "lambda_function_name" {
 output "lambda_log_group_name" {
   value = aws_cloudwatch_log_group.Lambda_cloudwatch_log_group.name
 }
+
+output "athena_workgroup_name" {
+  value       = aws_athena_workgroup.ede-athena-workgroup.name
+  description = "Athena workgroup name"
+}
+output "athena_results_bucket_name" {
+  value       = aws_s3_bucket.athena_results_bucket.bucket
+  description = "Athena results S3 bucket name"
+}   
+
+output "athena_results_location" {
+  value       = "s3://${aws_s3_bucket.athena_results_bucket.bucket}/output/"
+  description = "Athena results S3 location"
+}
