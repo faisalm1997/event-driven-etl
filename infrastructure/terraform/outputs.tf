@@ -20,3 +20,12 @@ output "curated_bucket_arn" {
   description = "Curated S3 bucket ARN"
 }
 
+output "lambda_role_arn" {
+  value       = aws_iam_role.lambda_execution.arn
+  description = "Lambda execution role ARN"
+}
+
+output "lambda_role_name" {
+  value       = aws_iam_role.lambda_execution.name
+  description = "Lambda execution role name"
+}
