@@ -29,3 +29,15 @@ output "lambda_role_name" {
   value       = aws_iam_role.lambda_execution.name
   description = "Lambda execution role name"
 }
+
+output "lambda_function_arn" {
+  value = aws_lambda_function.example.arn
+}
+
+output "lambda_function_name" {
+  value = aws_lambda_function.example.function_name
+}
+
+output "lambda_log_group_name" {
+  value = aws_cloudwatch_log_group.Lambda_cloudwatch_log_group.name
+}
