@@ -25,7 +25,7 @@ resource "aws_s3_bucket_server_side_encryption_configuration" "source_bucket_enc
 
   rule {
     apply_server_side_encryption_by_default {
-        sse_algorithm = "AES256"
+      sse_algorithm = "AES256"
     }
   }
 }
@@ -61,7 +61,7 @@ resource "aws_s3_bucket_server_side_encryption_configuration" "curated_bucket_en
 
   rule {
     apply_server_side_encryption_by_default {
-        sse_algorithm = "AES256"
+      sse_algorithm = "AES256"
     }
   }
 }
@@ -78,7 +78,7 @@ resource "aws_s3_bucket_public_access_block" "curated_bucket_public_access_block
 # S3 event notification to trigger lambda 
 
 resource "aws_s3_bucket_notification" "source_events" {
-  bucket = aws_s3_bucket.source.id
+  bucket = aws_s3_bucket.source_bucket.id
 
   lambda_function {
     lambda_function_arn = aws_lambda_function.validator.arn
