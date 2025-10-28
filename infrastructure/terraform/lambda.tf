@@ -1,51 +1,51 @@
 # Cloudwatch log group for lambda 
 
-resource "aws_cloudwatch_log_group" "Lambda_cloudwatch_log_group" {
-  name = "Lambda Cloudwatch Log Group"
+resource "aws_cloudwatch_log_group" "lambda_cloudwatch_log_group" {
+  name = "aws/lambda/${var.lambda_function_name}"
 
   tags = {
     Environment = "${var.environment}"
-    Application = "${var.application_name}"
+    Name        = "${var.lambda_function_name}-logs"
   }
 }
 
 # Lambda function 
 
-# Package the Lambda function code
-data "archive_file" "example" {
-  type        = "zip"
-  source_file = "${path.module}/lambda/index.js"
-  output_path = "${path.module}/lambda/function.zip"
-}
-
-# Lambda function
-resource "aws_lambda_function" "example" {
-  filename         = data.archive_file.example.output_path
-  function_name    = "ede-lambda-function"
-  role             = aws_iam_role.example.arn
-  handler          = "index.handler"
-  source_code_hash = data.archive_file.example.output_base64sha256
-
-  runtime = "nodejs20.x"
+resource "aws_lambda_function" "validator" {
+  function_name    = var.lambda_function_name
+  role             = aws_iam_role.lambda_execution.arn
+  handler          = var.lambda_handler
+  runtime          = var.lambda_runtime
+  filename         = var.lambda_package_path
+  source_code_hash = filebase64sha256(var.lambda_package_path)
+  timeout          = var.lambda_timeout
+  memory_size      = var.lambda_memory_size
 
   environment {
     variables = {
-      ENVIRONMENT = "${var.environment}"
-      LOG_LEVEL   = aws_cloudwatch_log_group.Lambda_cloudwatch_log_group.name
+      CURATED_BUCKET = aws_s3_bucket.curated_bucket.bucket
+      LOG_LEVEL      = var.log_level
+      ENVIRONMENT    = var.environment
     }
   }
 
-  tags = {
-    Environment = "${var.environment}"
-    Application = "${var.application_name}"
-  }
+  tags = merge(var.common_tags, {
+    Name = var.lambda_function_name
+  })
+
+  depends_on = [
+    aws_cloudwatch_log_group.lambda_cloudwatch_log_group,
+    aws_iam_role_policy_attachment.lambda_basic_execution,
+    aws_iam_role_policy_attachment.lambda_s3_access
+  ]
 }
 
 # Lambda permission for s3 Invoke
 
 resource "aws_lambda_permission" "allow_s3" {
-  statement_id  = "AllowExecutionFromS3"
+  statement_id  = "AllowS3Invoke"
   action        = "lambda:InvokeFunction"
-  function_name = aws_lambda_function.example.function_name
+  function_name = aws_lambda_function.validator.function_name
   principal     = "s3.amazonaws.com"
+  source_arn    = aws_s3_bucket.source_bucket.arn
 }

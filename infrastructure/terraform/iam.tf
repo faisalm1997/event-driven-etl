@@ -50,8 +50,8 @@ data "aws_iam_policy_document" "lambda_s3_access" {
     ]
 
     resources = [
-      aws_s3_bucket.source.arn,
-      "${aws_s3_bucket.source.arn}/*"
+      aws_s3_bucket.source_bucket.arn,
+      "${aws_s3_bucket.source_bucket.arn}/*"
     ]
   }
 
@@ -65,8 +65,8 @@ data "aws_iam_policy_document" "lambda_s3_access" {
     ]
 
     resources = [
-      aws_s3_bucket.curated.arn,
-      "${aws_s3_bucket.curated.arn}/*"
+      aws_s3_bucket.curated_bucket.arn,
+      "${aws_s3_bucket.curated_bucket.arn}/*"
     ]
   }
 }

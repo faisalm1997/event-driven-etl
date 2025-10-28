@@ -1,6 +1,7 @@
 # S3 bucket for athena query results + S3 bucket versioning + server side encryption + block public acl + lifecycle configuration to clean up old queries
 
 resource "aws_s3_bucket" "athena_results_bucket" {
+  count  = var.enable_glue_athena ? 1 : 0
   bucket = "${var.project_name}-athena-results-${var.environment}"
 
   tags = {
@@ -9,7 +10,8 @@ resource "aws_s3_bucket" "athena_results_bucket" {
 }
 
 resource "aws_s3_bucket_versioning" "athena_results_bucket" {
-  bucket = aws_s3_bucket.athena_results_bucket.id
+  count  = var.enable_glue_athena ? 1 : 0
+  bucket = aws_s3_bucket.athena_results_bucket[0].id
 
   versioning_configuration {
     status = "Enabled"
@@ -17,7 +19,8 @@ resource "aws_s3_bucket_versioning" "athena_results_bucket" {
 }
 
 resource "aws_s3_bucket_server_side_encryption_configuration" "athena_results_bucket_encryption" {
-  bucket = aws_s3_bucket.athena_results_bucket.id
+  count  = var.enable_glue_athena ? 1 : 0
+  bucket = aws_s3_bucket.athena_results_bucket[0].id
 
   rule {
     apply_server_side_encryption_by_default {
@@ -27,7 +30,8 @@ resource "aws_s3_bucket_server_side_encryption_configuration" "athena_results_bu
 }
 
 resource "aws_s3_bucket_public_access_block" "athena_results_bucket_public_access_block" {
-  bucket = aws_s3_bucket.athena_results_bucket.id
+  count  = var.enable_glue_athena ? 1 : 0
+  bucket = aws_s3_bucket.athena_results_bucket[0].id
 
   block_public_acls       = true
   block_public_policy     = true
@@ -36,7 +40,8 @@ resource "aws_s3_bucket_public_access_block" "athena_results_bucket_public_acces
 }
 
 resource "aws_s3_bucket_lifecycle_configuration" "athena_results_bucket_lifecycle" {
-  bucket = aws_s3_bucket.athena_results_bucket.id
+  count  = var.enable_glue_athena ? 1 : 0
+  bucket = aws_s3_bucket.athena_results_bucket[0].id
 
   rule {
     id     = "ExpireOldQueryResults"
@@ -53,17 +58,18 @@ resource "aws_s3_bucket_lifecycle_configuration" "athena_results_bucket_lifecycl
 # Athena workgroup 
 
 resource "aws_athena_workgroup" "ede-athena-workgroup" {
-  name = "ede-athena-workgroup-${var.project_name}-${var.environment}"
+  count = var.enable_glue_athena ? 1 : 0
+  name  = var.athena_workgroup_name
 
   configuration {
     enforce_workgroup_configuration    = true
     publish_cloudwatch_metrics_enabled = true
 
     result_configuration {
-      output_location = "s3://${aws_s3_bucket.athena_results_bucket.bucket}/output/"
+      output_location = "s3://${aws_s3_bucket.athena_results_bucket[0].bucket}/output/"
 
       encryption_configuration {
-        encryption_option = "SSE_KMS"
+        encryption_option = "SSE_S3"
       }
     }
   }
