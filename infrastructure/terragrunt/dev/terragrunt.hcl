@@ -34,6 +34,7 @@ inputs = {
 
   # Glue/Athena Configuration
   enable_glue_athena         = true
+  alert_email                = "faisalmomoniat@googlemail.com"
   glue_database_name         = "ede_dev"
   glue_table_name            = "validated_events"
   athena_results_bucket_name = "" 
