@@ -1,4 +1,3 @@
-# src/lambda/quality_checker.py
 import json
 import logging
 import os

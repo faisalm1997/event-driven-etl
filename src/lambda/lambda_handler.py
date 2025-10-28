@@ -1,4 +1,3 @@
-# src/lambda/lambda_handler.py
 import json
 import logging
 import os
@@ -76,7 +75,7 @@ def handler(event, context):
                 ContentType="application/json"
             )
             
-            logger.info(f"✅ Wrote {len(validated_items)} items to s3://{CURATED_BUCKET}/{output_key}")
+            logger.info(f" Wrote {len(validated_items)} items to s3://{CURATED_BUCKET}/{output_key}")
             
         except json.JSONDecodeError as e:
             logger.error(f"Invalid JSON in {key}: {e}")
