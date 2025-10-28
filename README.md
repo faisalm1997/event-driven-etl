@@ -8,36 +8,38 @@ Purpose: Event-driven ETL pipeline for ingesting and processing real-time data s
 event-driven-etl/
 ├── infrastructure/
 │   ├── terraform/
-│   │   ├── modules/
-│   │   │   ├── kinesis/
-│   │   │   ├── lambda/
-│   │   │   ├── s3/
-│   │   │   ├── glue/
-│   │   │   └── redshift/
-│   │   └── envs/
+│   │   ├── main.tf
+│   │   ├── variables.tf
+│   │   ├── outputs.tf
+│   │   ├── backend.tf
+│   │   ├── s3.tf
+│   │   ├── iam.tf
+│   │   ├── lambda.tf
+│   │   ├── lambda_quality.tf
+│   │   ├── sqs.tf
+│   │   ├── glue.tf
+│   │   ├── athena.tf
+│   │   └── cloudwatch.tf
 │   └── terragrunt/
-│       ├── dev/
-│       └── prod/
+│       ├── terragrunt.hcl
+│       └── dev/
+│           └── terragrunt.hcl
 ├── src/
-│   ├── producer/
-│   │   └── event_producer.py
-│   ├── consumers/
-│   │   └── lambda_handler.py
-│   └── glue_jobs/
-│       └── streaming_transform.py
-├── config/
-│   └── stream_config.yaml
+│   └── lambda/
+│       ├── lambda_handler.py
+│       ├── quality_checker.py
+│       └── build/
+│           ├── validator.zip
+│           └── quality.zip
 ├── scripts/
-│   ├── deploy_lambda.sh
-│   └── test_producer.sh
-├── tests/
-│   ├── test_lambda_handler.py
-│   └── test_glue_transform.py
-├── .github/
-│   ├── github-actions.yaml
-│   └── codebuild-buildspec.yml
+│   ├── package_lambda.sh
+│   └── load_test_data.sh
 ├── docs/
-│   ├── architecture.png
+│   ├── architecture.md
+│   ├── sample_queries.sql
 │   └── runbook.md
+├── tests/
+│   └── test_validation.py
+├── .gitignore
 └── README.md
 ```
