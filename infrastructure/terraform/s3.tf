@@ -75,7 +75,7 @@ resource "aws_s3_bucket_public_access_block" "curated_bucket_public_access_block
   restrict_public_buckets = true
 }
 
-# S3 event notification to trigger lambda 
+# S3 event notification to trigger source > curated lambda
 
 resource "aws_s3_bucket_notification" "source_events" {
   bucket = aws_s3_bucket.source_bucket.id
@@ -88,4 +88,18 @@ resource "aws_s3_bucket_notification" "source_events" {
   }
 
   depends_on = [aws_lambda_permission.allow_s3]
+}
+
+# S3 notification for quality check lambda 
+
+resource "aws_s3_bucket_notification" "curated_events" {
+  bucket = aws_s3_bucket.curated_bucket.id
+
+  lambda_function {
+    lambda_function_arn = aws_lambda_function.quality_checker.arn
+    events              = ["s3:ObjectCreated:*"]
+    filter_prefix       = "validated/"
+  }
+
+  depends_on = [aws_lambda_permission.quality_allow_s3]
 }

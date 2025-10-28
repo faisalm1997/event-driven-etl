@@ -29,6 +29,10 @@ resource "aws_lambda_function" "validator" {
     }
   }
 
+  dead_letter_config {
+    target_arn = aws_sqs_queue.dlq.arn
+  }
+
   tags = merge(var.common_tags, {
     Name = var.lambda_function_name
   })

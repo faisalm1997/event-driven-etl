@@ -83,3 +83,8 @@ resource "aws_iam_role_policy_attachment" "lambda_s3_access" {
   role       = aws_iam_role.lambda_execution.name
   policy_arn = aws_iam_policy.lambda_s3_policy.arn
 }
+
+resource "aws_iam_role_policy_attachment" "lambda_sqs" {
+  role       = aws_iam_role.lambda_execution.name
+  policy_arn = "arn:aws:iam::aws:policy/service-role/AWSLambdaSQSQueueExecutionRole"
+}

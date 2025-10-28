@@ -17,6 +17,12 @@ resource "aws_glue_catalog_table" "validated_events_table" {
 
   parameters = {
     "classification" = "json"
+    "comment"            = "Validated event data from S3 ingestion pipeline"
+    "data_owner"         = "data-engineering"
+    "data_classification" = "internal"
+    "retention_days"     = "90"
+    "created_by"         = "terraform"
+
     "projection.enabled" = "true"
     "projection.year.type" = "integer"
     "projection.year.range" = "2020,2030"
