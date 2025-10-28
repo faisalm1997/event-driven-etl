@@ -16,18 +16,30 @@ resource "aws_glue_catalog_table" "validated_events_table" {
   table_type = "EXTERNAL_TABLE"
 
   parameters = {
-    "classification"  = "JSON"
-    "compressionType" = "none"
-    "typeOfData"      = "file"
+    "classification" = "json"
+    "projection.enabled" = "true"
+    "projection.year.type" = "integer"
+    "projection.year.range" = "2020,2030"
+    "projection.month.type" = "integer"
+    "projection.month.range" = "1,12"
+    "projection.month.digits" = "2"
+    "projection.day.type" = "integer"
+    "projection.day.range" = "1,31"
+    "projection.day.digits" = "2"
+    "storage.location.template" = "s3://${aws_s3_bucket.curated.bucket}/validated/year=$${year}/month=$${month}/day=$${day}"
   }
 
   storage_descriptor {
-    location      = "s3://${var.curated_bucket_name}/validated_events/"
+    location      = "s3://${aws_s3_bucket.curated.bucket}/validated/"
     input_format  = "org.apache.hadoop.mapred.TextInputFormat"
     output_format = "org.apache.hadoop.hive.ql.io.HiveIgnoreKeyTextOutputFormat"
+
     ser_de_info {
-      name                  = "json_serde"
-      serialization_library = "org.apache.hadoop.hive.ql.io.parquet.serde.ParquetHiveSerDe"
+      name                  = "json-serde"
+      serialization_library = "org.openx.data.jsonserde.JsonSerDe"
+      parameters = {
+        "serialization.format" = "1"
+      }
     }
 
     columns {
@@ -44,6 +56,31 @@ resource "aws_glue_catalog_table" "validated_events_table" {
       name = "value"
       type = "double"
     }
+
+    columns {
+      name = "_ingested_at"
+      type = "string"
+    }
+
+    columns {
+      name = "_source_file"
+      type = "string"
+    }
+  }
+
+  partition_keys {
+    name = "year"
+    type = "int"
+  }
+
+  partition_keys {
+    name = "month"
+    type = "int"
+  }
+
+  partition_keys {
+    name = "day"
+    type = "int"
   }
 }
 

@@ -32,3 +32,5 @@ planout
 *.lock.hcl
 *.tfstate
 *.tfstate.backup
+
+./terragrunt/.terragrunt-cache/
