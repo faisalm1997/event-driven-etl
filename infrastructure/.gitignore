@@ -33,4 +33,5 @@ planout
 *.tfstate
 *.tfstate.backup
 
-./terragrunt/.terragrunt-cache/
+
+.terragrunt-cache
