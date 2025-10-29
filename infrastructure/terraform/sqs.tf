@@ -1,6 +1,6 @@
 resource "aws_sqs_queue" "dlq" {
   name                      = "${var.project_name}-${var.environment}-dlq"
-  message_retention_seconds = 1209600  # approx 14 days
+  message_retention_seconds = 1209600 # 14 days
   
   tags = merge(var.common_tags, {
     Name = "validation-dlq"

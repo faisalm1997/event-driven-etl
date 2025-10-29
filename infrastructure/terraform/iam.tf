@@ -84,7 +84,29 @@ resource "aws_iam_role_policy_attachment" "lambda_s3_access" {
   policy_arn = aws_iam_policy.lambda_s3_policy.arn
 }
 
-resource "aws_iam_role_policy_attachment" "lambda_sqs" {
+data "aws_iam_policy_document" "lambda_sqs_access" {
+  statement {
+    sid = "AllowSQSSendMessage"
+    
+    actions = [
+      "sqs:SendMessage"
+    ]
+    
+    resources = [
+      aws_sqs_queue.dlq.arn
+    ]
+  }
+}
+
+resource "aws_iam_policy" "lambda_sqs_policy" {
+  name        = "${var.lambda_function_name}-sqs-policy"
+  description = "SQS DLQ access policy for Lambda validator function"
+  policy      = data.aws_iam_policy_document.lambda_sqs_access.json
+  
+  tags = var.common_tags
+}
+
+resource "aws_iam_role_policy_attachment" "lambda_sqs_access" {
   role       = aws_iam_role.lambda_execution.name
-  policy_arn = "arn:aws:iam::aws:policy/service-role/AWSLambdaSQSQueueExecutionRole"
+  policy_arn = aws_iam_policy.lambda_sqs_policy.arn
 }

@@ -29,7 +29,8 @@ resource "aws_lambda_function" "validator" {
   depends_on = [
     aws_cloudwatch_log_group.lambda_cloudwatch_log_group,
     aws_iam_role_policy_attachment.lambda_basic_execution,
-    aws_iam_role_policy_attachment.lambda_s3_access
+    aws_iam_role_policy_attachment.lambda_s3_access,
+    aws_iam_role_policy_attachment.lambda_sqs_access
   ]
 }
 
