@@ -90,7 +90,7 @@ resource "aws_cloudwatch_log_metric_filter" "validation_failure" {
 # Cloudwatch log group for lambda_validation
 
 resource "aws_cloudwatch_log_group" "lambda_cloudwatch_log_group" {
-  name = "aws/lambda/${var.lambda_function_name}"
+  name = "ede/lambda/${var.lambda_function_name}"
 
   tags = {
     Environment = "${var.environment}"
