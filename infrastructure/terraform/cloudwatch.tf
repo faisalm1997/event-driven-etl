@@ -1,4 +1,4 @@
-# Lambda error alarm
+# Lambda Validation error alarm
 resource "aws_cloudwatch_metric_alarm" "lambda_errors" {
   alarm_name          = "${var.lambda_function_name}-errors"
   comparison_operator = "GreaterThanThreshold"
@@ -20,7 +20,7 @@ resource "aws_cloudwatch_metric_alarm" "lambda_errors" {
   tags = var.common_tags
 }
 
-# Lambda duration alarm
+# Lambda validation duration alarm
 resource "aws_cloudwatch_metric_alarm" "lambda_duration" {
   alarm_name          = "${var.lambda_function_name}-duration"
   comparison_operator = "GreaterThanThreshold"
@@ -65,7 +65,7 @@ resource "aws_cloudwatch_metric_alarm" "dlq_depth" {
 # Validation success and failure rate
 resource "aws_cloudwatch_log_metric_filter" "validation_success" {
   name           = "ValidationSuccess"
-  log_group_name = aws_cloudwatch_log_group.lambda_logs.name
+  log_group_name = aws_cloudwatch_log_group.lambda_cloudwatch_log_group.name
   pattern        = "[time, request_id, level=INFO*, msg=\"Successfully validated*\"]"
 
   metric_transformation {
@@ -77,12 +77,23 @@ resource "aws_cloudwatch_log_metric_filter" "validation_success" {
 
 resource "aws_cloudwatch_log_metric_filter" "validation_failure" {
   name           = "ValidationFailure"
-  log_group_name = aws_cloudwatch_log_group.lambda_logs.name
+  log_group_name = aws_cloudwatch_log_group.lambda_cloudwatch_log_group.name
   pattern        = "[time, request_id, level=ERROR*, msg=\"Validation failed*\"]"
 
   metric_transformation {
     name      = "ValidationFailure"
     namespace = "${var.project_name}/${var.environment}"
     value     = "1"
+  }
+}
+
+# Cloudwatch log group for lambda_validation
+
+resource "aws_cloudwatch_log_group" "lambda_cloudwatch_log_group" {
+  name = "aws/lambda/${var.lambda_function_name}"
+
+  tags = {
+    Environment = "${var.environment}"
+    Name        = "${var.lambda_function_name}-logs"
   }
 }

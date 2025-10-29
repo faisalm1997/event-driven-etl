@@ -56,6 +56,11 @@ variable "lambda_package_path" {
   description = "Path to Lambda ZIP package"
 }
 
+variable "lambda_quality_package_path" {
+  type        = string 
+  description = "Path to Lambda quality package path"
+}
+
 variable "lambda_timeout" {
   type        = number
   description = "Lambda timeout in seconds"
@@ -110,4 +115,12 @@ variable "common_tags" {
   type        = map(string)
   description = "Common resource tags"
   default     = {}
+}
+
+# Alerting 
+
+variable "alert_email" {
+  type        = string
+  description = "Email address for SNS alerts"
+  default     = ""
 }

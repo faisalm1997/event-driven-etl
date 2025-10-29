@@ -32,11 +32,11 @@ resource "aws_glue_catalog_table" "validated_events_table" {
     "projection.day.type" = "integer"
     "projection.day.range" = "1,31"
     "projection.day.digits" = "2"
-    "storage.location.template" = "s3://${aws_s3_bucket.curated.bucket}/validated/year=$${year}/month=$${month}/day=$${day}"
+    "storage.location.template" = "s3://${aws_s3_bucket.curated_bucket.bucket}/validated/year=$${year}/month=$${month}/day=$${day}"
   }
 
   storage_descriptor {
-    location      = "s3://${aws_s3_bucket.curated.bucket}/validated/"
+    location      = "s3://${aws_s3_bucket.curated_bucket.bucket}/validated/"
     input_format  = "org.apache.hadoop.mapred.TextInputFormat"
     output_format = "org.apache.hadoop.hive.ql.io.HiveIgnoreKeyTextOutputFormat"
 

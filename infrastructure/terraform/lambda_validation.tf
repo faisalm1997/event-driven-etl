@@ -1,14 +1,3 @@
-# Cloudwatch log group for lambda 
-
-resource "aws_cloudwatch_log_group" "lambda_cloudwatch_log_group" {
-  name = "aws/lambda/${var.lambda_function_name}"
-
-  tags = {
-    Environment = "${var.environment}"
-    Name        = "${var.lambda_function_name}-logs"
-  }
-}
-
 # Lambda function 
 
 resource "aws_lambda_function" "validator" {
