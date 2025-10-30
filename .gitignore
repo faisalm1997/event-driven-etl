@@ -37,4 +37,4 @@ planout
 
 src/lambda/build/
 src/lambda/layers/
-*.zip
+*.zipsrc/lambda/layers/
