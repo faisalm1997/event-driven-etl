@@ -10,9 +10,9 @@ resource "aws_lambda_function" "validator" {
   timeout          = var.lambda_timeout
   memory_size      = var.lambda_memory_size
 
-layers = [
-  "arn:aws:lambda:us-east-1:770693421928:layer:Klayers-p312-pyarrow:1"
-]
+  layers = [
+    "arn:aws:lambda:us-east-1:336392948345:layer:AWSSDKPandas-Python312:19"
+  ]
 
   environment {
     variables = {

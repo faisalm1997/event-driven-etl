@@ -5,7 +5,6 @@
 # Lambda s3 policy 
 # Lambda S3 access
 # Ouputs for lambda role arn + lambda role name
-
 # Lambda AssumeRole Policy 
 
 # IAM role for Lambda execution
