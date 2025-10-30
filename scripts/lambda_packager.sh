@@ -14,7 +14,8 @@ echo "Packaging validator Lambda..."
 rm -rf package
 mkdir package
 
-python3 -m pip install jsonschema boto3 -t package/ --quiet
+python3 -m pip install jsonschema==3.2.0 boto3 pyarrow -t package/ --quiet
+
 cp lambda_handler.py package/
 
 cd package
@@ -30,7 +31,8 @@ echo "Packaging quality checker Lambda..."
 rm -rf package
 mkdir package
 
-python3 -m pip install jsonschema boto3 -t package/ --quiet
+python3 -m pip install jsonschema==3.2.0  boto3 -t package/ --quiet
+
 cp quality_checker.py package/
 
 cd package

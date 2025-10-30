@@ -29,9 +29,10 @@ event-driven-etl/
 │   │   ├── backend.tf
 │   │   ├── s3.tf
 │   │   ├── iam.tf
-│   │   ├── lambda.tf
+│   │   ├── lambda_validation.tf
 │   │   ├── lambda_quality.tf
 │   │   ├── sqs.tf
+│   │   ├── sns.tf
 │   │   ├── glue.tf
 │   │   ├── athena.tf
 │   │   └── cloudwatch.tf
@@ -50,9 +51,8 @@ event-driven-etl/
 │   ├── package_lambda.sh
 │   └── load_test_data.sh
 ├── docs/
-│   ├── architecture.md
-│   ├── sample_queries.sql
-│   └── runbook.md
+│   ├── architecture.png
+│   └── sample_queries.sql
 ├── tests/
 │   └── test_validation.py
 ├── .gitignore
@@ -73,6 +73,27 @@ aws --version
 terraform --version
 terragrunt --version
 python3 --version
+```
+
+## Quick Reference
+
+```bash
+# Deploy
+cd infrastructure/terragrunt/dev && terragrunt apply
+
+# Upload test data
+./scripts/load_test_data.sh
+
+# View logs
+aws logs tail /aws/lambda/ede-dev-validator --follow
+
+# Query data
+aws athena start-query-execution \
+  --query-string "SELECT COUNT(*) FROM ede_dev.validated_events" \
+  --work-group ede-dev
+
+# Cleanup
+cd infrastructure/terragrunt/dev && terragrunt destroy
 ```
 
 ## Deployment
@@ -303,27 +324,6 @@ aws s3 rm "s3://$CURATED_BUCKET" --recursive
 
 # Destroy all resources
 terragrunt destroy
-```
-
-## Quick Reference
-
-```bash
-# Deploy
-cd infrastructure/terragrunt/dev && terragrunt apply
-
-# Upload test data
-./scripts/load_test_data.sh
-
-# View logs
-aws logs tail /aws/lambda/ede-dev-validator --follow
-
-# Query data
-aws athena start-query-execution \
-  --query-string "SELECT COUNT(*) FROM ede_dev.validated_events" \
-  --work-group ede-dev
-
-# Cleanup
-cd infrastructure/terragrunt/dev && terragrunt destroy
 ```
 
 ## Configuration

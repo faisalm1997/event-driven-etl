@@ -2,8 +2,11 @@ import json
 import logging
 import os
 import boto3
+import pyarrow as pa
+import pyarrow.parquet as pq
 from datetime import datetime
 from jsonschema import validate, Draft7Validator, ValidationError
+from io import BytesIO
 
 logger = logging.getLogger()
 logger.setLevel(os.getenv("LOG_LEVEL", "INFO"))
@@ -24,7 +27,7 @@ JSON_SCHEMA = {
 
 def handler(event, context):
     """
-    Validates JSON files from S3 and writes to partitioned curated bucket
+    Validates JSON files from S3 and writes to partitioned curated bucket as Parquet
     """
     for record in event.get("Records", []):
         bucket = record["s3"]["bucket"]["name"]
@@ -56,26 +59,31 @@ def handler(event, context):
                     logger.error(f"Validation failed for item {idx} in {key}: {ve.message}")
                     raise
             
-            # Extract partition from timestamp (assume ISO format in 'ts' field)
-            # Use first item's timestamp for partition
-            if validated_items:
-                ts = datetime.fromisoformat(validated_items[0]["ts"].replace("Z", "+00:00"))
-                partition = f"year={ts.year}/month={ts.month:02d}/day={ts.day:02d}"
-            else:
-                # Fallback to ingestion date
-                now = datetime.utcnow()
-                partition = f"year={now.year}/month={now.month:02d}/day={now.day:02d}"
+            if not validated_items:
+                logger.warning(f"No valid items in {key}")
+                return {"statusCode": 200, "body": "No items to process"}
+            
+            # Extract partition from timestamp
+            ts = datetime.fromisoformat(validated_items[0]["ts"].replace("Z", "+00:00"))
+            partition = f"year={ts.year}/month={ts.month:02d}/day={ts.day:02d}"
+            
+            # Convert to Parquet
+            table = pa.Table.from_pylist(validated_items)
+            parquet_buffer = BytesIO()
+            pq.write_table(table, parquet_buffer, compression='snappy')
             
             # Write to partitioned location
-            output_key = f"validated/{partition}/{key.split('/')[-1]}"
+            base_filename = key.split('/')[-1].replace('.json', '')
+            output_key = f"validated/{partition}/{base_filename}.parquet"
+            
             s3_client.put_object(
                 Bucket=CURATED_BUCKET,
                 Key=output_key,
-                Body=json.dumps(validated_items, indent=2),
-                ContentType="application/json"
+                Body=parquet_buffer.getvalue(),
+                ContentType="application/octet-stream"
             )
             
-            logger.info(f" Wrote {len(validated_items)} items to s3://{CURATED_BUCKET}/{output_key}")
+            logger.info(f"Wrote {len(validated_items)} items to s3://{CURATED_BUCKET}/{output_key}")
             
         except json.JSONDecodeError as e:
             logger.error(f"Invalid JSON in {key}: {e}")
