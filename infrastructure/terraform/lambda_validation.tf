@@ -10,6 +10,10 @@ resource "aws_lambda_function" "validator" {
   timeout          = var.lambda_timeout
   memory_size      = var.lambda_memory_size
 
+layers = [
+  "arn:aws:lambda:us-east-1:770693421928:layer:Klayers-p312-pyarrow:1"
+]
+
   environment {
     variables = {
       CURATED_BUCKET = aws_s3_bucket.curated_bucket.bucket

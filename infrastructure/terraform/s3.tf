@@ -7,6 +7,7 @@
 
 resource "aws_s3_bucket" "source_bucket" {
   bucket = var.source_bucket_name
+  force_destroy = true
 
   tags = {
     Name = "${var.project_name}-source-json-${var.environment}"
@@ -43,6 +44,7 @@ resource "aws_s3_bucket_public_access_block" "source_bucket_public_access_block"
 
 resource "aws_s3_bucket" "curated_bucket" {
   bucket = var.curated_bucket_name
+  force_destroy = true
 
   tags = {
     Name = "${var.project_name}-curated-parquet-${var.environment}"

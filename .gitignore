@@ -35,4 +35,6 @@ planout
 
 .terragrunt-cache
 
-./build/*.zip
+src/lambda/build/
+src/lambda/layers/
+*.zip

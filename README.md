@@ -1,21 +1,25 @@
-# event-driven-etl
+# Event-driven-etl
 
-Event-driven ETL pipeline for ingesting, validating, and processing JSON data streams using S3, Lambda, Glue, and Athena.
+Event-driven ETL pipeline for ingesting, validating, and processing JSON data streams using AWS serverless services.
 
 ## Architecture
 
-JSON files → S3 (source) → Lambda (validate) → S3 (curated) → Athena (query)
+```
+JSON files → S3 (source) → Lambda (validator) → S3 (curated) → Lambda (quality) → Athena
+                                    ↓
+                            SQS (dead letter queue)
+```
 
 ## Features
 
-- **Event-driven ingestion**: S3 events trigger Lambda processing
-- **Schema validation**: JSON schema validation with error handling
-- **Data partitioning**: Automatic partitioning by date for query optimization
-- **Data quality checks**: Automated quality validation on curated data
-- **Dead letter queue**: Failed validations routed to SQS for investigation
-- **Monitoring**: CloudWatch alarms for errors, duration, and DLQ depth
-- **SQL queries**: Athena interface for ad-hoc analytics
-- **Infrastructure as Code**: Terraform + Terragrunt for reproducible deployments
+- **Event-driven**: S3 events automatically trigger Lambda processing
+- **Schema validation**: JSON validation with jsonschema library
+- **Date partitioning**: Automatic year/month/day partitioning for efficient queries
+- **Quality checks**: Automated null, duplicate, and range validation
+- **Error handling**: Dead letter queue for failed validations
+- **Monitoring**: CloudWatch alarms and dashboards
+- **Infrastructure as Code**: Terraform + Terragrunt
+
 
 ## Repo Structure
 
