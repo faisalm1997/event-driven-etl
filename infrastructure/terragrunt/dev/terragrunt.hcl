@@ -26,7 +26,7 @@ inputs = {
   curated_bucket_name = "ede-dev-curated-${local.account_id}"
   s3_filter_prefix    = "incoming/"
 
-    # Lambda Validator Configuration
+  # Lambda Validator Configuration
   lambda_function_name = "ede-dev-validator"
   lambda_handler       = "lambda_handler.handler"
   lambda_runtime       = "python3.12"
