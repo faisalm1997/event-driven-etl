@@ -1,14 +1,3 @@
-# PyArrow Lambda Layer
-
-resource "aws_lambda_layer_version" "pyarrow_layer" {
-  filename            = "${path.root}/../../src/lambda/layers/pyarrow-layer.zip"
-  layer_name          = "${var.project_name}-${var.environment}-pyarrow"
-  compatible_runtimes = ["python3.12"]
-  description         = "PyArrow 14.0.1 for Parquet processing"
-  
-  source_code_hash = filebase64sha256("${path.root}/../../src/lambda/layers/pyarrow-layer.zip")
-}
-
 # Lambda function 
 resource "aws_lambda_function" "validator" {
   function_name    = var.lambda_function_name
@@ -20,8 +9,7 @@ resource "aws_lambda_function" "validator" {
   timeout          = var.lambda_timeout
   memory_size      = var.lambda_memory_size
 
-  # Use custom PyArrow layer
-  layers = [aws_lambda_layer_version.pyarrow_layer.arn]
+  # No layers needed - CSV is standard library!
 
   environment {
     variables = {
@@ -43,8 +31,7 @@ resource "aws_lambda_function" "validator" {
     aws_cloudwatch_log_group.lambda_cloudwatch_log_group,
     aws_iam_role_policy_attachment.lambda_basic_execution,
     aws_iam_role_policy_attachment.lambda_s3_access,
-    aws_iam_role_policy_attachment.lambda_sqs_access,
-    aws_lambda_layer_version.pyarrow_layer
+    aws_iam_role_policy_attachment.lambda_sqs_access
   ]
 }
 
