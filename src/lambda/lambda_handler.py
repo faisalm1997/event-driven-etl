@@ -2,11 +2,11 @@ import json
 import logging
 import os
 import boto3
+from datetime import datetime
+from io import BytesIO
+from jsonschema import validate, Draft7Validator, ValidationError
 import pyarrow as pa
 import pyarrow.parquet as pq
-from datetime import datetime
-from jsonschema import validate, Draft7Validator, ValidationError
-from io import BytesIO
 
 logger = logging.getLogger()
 logger.setLevel(os.getenv("LOG_LEVEL", "INFO"))
