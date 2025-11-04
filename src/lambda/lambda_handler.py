@@ -2,11 +2,11 @@ import json
 import logging
 import os
 import boto3
+import csv
+import gzip
 from datetime import datetime
-from io import BytesIO
+from io import StringIO, BytesIO
 from jsonschema import validate, Draft7Validator, ValidationError
-import pyarrow as pa
-import pyarrow.parquet as pq
 
 logger = logging.getLogger()
 logger.setLevel(os.getenv("LOG_LEVEL", "INFO"))
@@ -27,7 +27,7 @@ JSON_SCHEMA = {
 
 def handler(event, context):
     """
-    Validates JSON files from S3 and writes to partitioned curated bucket as Parquet
+    Validates JSON files from S3 and writes to partitioned curated bucket as CSV.gz
     """
     for record in event.get("Records", []):
         bucket = record["s3"]["bucket"]["name"]
@@ -67,23 +67,40 @@ def handler(event, context):
             ts = datetime.fromisoformat(validated_items[0]["ts"].replace("Z", "+00:00"))
             partition = f"year={ts.year}/month={ts.month:02d}/day={ts.day:02d}"
             
-            # Convert to Parquet
-            table = pa.Table.from_pylist(validated_items)
-            parquet_buffer = BytesIO()
-            pq.write_table(table, parquet_buffer, compression='snappy')
+            # Convert to CSV and compress with gzip
+            csv_buffer = StringIO()
+            if validated_items:
+                fieldnames = list(validated_items[0].keys())
+                writer = csv.DictWriter(csv_buffer, fieldnames=fieldnames)
+                writer.writeheader()
+                writer.writerows(validated_items)
+            
+            # Compress CSV
+            csv_bytes = csv_buffer.getvalue().encode('utf-8')
+            gzip_buffer = BytesIO()
+            with gzip.GzipFile(fileobj=gzip_buffer, mode='wb') as gz:
+                gz.write(csv_bytes)
             
             # Write to partitioned location
             base_filename = key.split('/')[-1].replace('.json', '')
-            output_key = f"validated/{partition}/{base_filename}.parquet"
+            output_key = f"validated/{partition}/{base_filename}.csv.gz"
             
             s3_client.put_object(
                 Bucket=CURATED_BUCKET,
                 Key=output_key,
-                Body=parquet_buffer.getvalue(),
-                ContentType="application/octet-stream"
+                Body=gzip_buffer.getvalue(),
+                ContentType="application/gzip",
+                ContentEncoding="gzip"
             )
             
-            logger.info(f"Wrote {len(validated_items)} items to s3://{CURATED_BUCKET}/{output_key}")
+            original_size = len(csv_bytes)
+            compressed_size = len(gzip_buffer.getvalue())
+            compression_ratio = (1 - compressed_size/original_size) * 100
+            
+            logger.info(
+                f"✅ Wrote {len(validated_items)} items to s3://{CURATED_BUCKET}/{output_key} "
+                f"(compression: {compression_ratio:.1f}%)"
+            )
             
         except json.JSONDecodeError as e:
             logger.error(f"Invalid JSON in {key}: {e}")
