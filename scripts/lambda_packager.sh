@@ -1,63 +1,12 @@
 #!/bin/bash
 set -e
 
-echo "Packaging Lambda functions and PyArrow layer..."
+echo "Packaging Lambda functions..."
 
 cd "$(dirname "$0")/../src/lambda"
-mkdir -p build layers
+mkdir -p build
 
-# Build PyArrow layer with Docker (Lambda-compatible)
-echo ""
-echo "Building PyArrow layer with Docker..."
-
-if ! command -v docker &> /dev/null; then
-    echo "❌ Docker is required to build Lambda layers"
-    echo "Install Docker Desktop: https://www.docker.com/products/docker-desktop"
-    exit 1
-fi
-
-# Create Dockerfile for layer building
-cat > Dockerfile.layer <<'EOF'
-FROM public.ecr.aws/lambda/python:3.12
-
-WORKDIR /opt
-
-# Install PyArrow in the layer structure
-RUN pip install --no-cache-dir pyarrow==14.0.1 -t python/
-
-# Clean up unnecessary files to reduce size
-RUN find python/ -type d -name "tests" -exec rm -rf {} + 2>/dev/null || true
-RUN find python/ -type d -name "__pycache__" -exec rm -rf {} + 2>/dev/null || true
-RUN find python/ -name "*.pyc" -delete
-EOF
-
-# Build layer with Docker
-echo "Building Docker image..."
-docker build -f Dockerfile.layer -t lambda-pyarrow-layer . --quiet
-
-# Extract layer from container
-echo "Extracting layer files..."
-rm -rf layer_temp
-mkdir layer_temp
-
-CONTAINER_ID=$(docker create lambda-pyarrow-layer)
-docker cp $CONTAINER_ID:/opt/python layer_temp/
-docker rm $CONTAINER_ID > /dev/null
-
-# Zip the layer
-echo "Creating layer ZIP..."
-cd layer_temp
-zip -r -q ../layers/pyarrow-layer.zip python/
-cd ..
-
-LAYER_SIZE=$(du -h layers/pyarrow-layer.zip | cut -f1)
-echo "PyArrow layer: $LAYER_SIZE"
-
-# Clean up
-rm -rf layer_temp
-rm Dockerfile.layer
-
-# Package Validator Lambda (without PyArrow)
+# Package Validator Lambda (CSV - no dependencies!)
 echo ""
 echo "Packaging validator Lambda..."
 rm -rf package
@@ -99,6 +48,7 @@ echo ""
 echo "All packages created successfully!"
 echo ""
 echo "Summary:"
-echo "  - PyArrow layer: $LAYER_SIZE (custom built)"
-echo "  - Validator Lambda: $VALIDATOR_SIZE"
+echo "  - Validator Lambda: $VALIDATOR_SIZE (outputs CSV.gz)"
 echo "  - Quality Lambda: $QUALITY_SIZE"
+echo ""
+echo "Output format: CSV with gzip compression"
